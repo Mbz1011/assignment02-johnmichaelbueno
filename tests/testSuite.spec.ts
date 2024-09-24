@@ -1,18 +1,62 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
+  test.describe('Test suite backend V1', () => {
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+  let tokenValue;
+    test.beforeAll('Test case 01 - Get all rooms', async ({ request }) => {
+      const respToken = await request.post("http://localhost:3000/api/login", {
+        data:{
+          username:"tester01",
+          password:"GteteqbQQgSr88SwNExUQv2ydb7xuf8c"
+        }
+      })
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+      tokenValue = (await respToken.json()).token;
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
-});
+
+
+    });
+
+    test('Test case 01 - Get all rooms', async ({ request }) => {
+      const respRooms = await request.get("http://localhost:3000/api/rooms", {
+        headers: {
+          "X-user-auth": JSON.stringify({
+            username: "tester01",
+            token: tokenValue 
+          })
+        },
+      });
+
+      console.log(await respRooms.json())
+      expect (await respRooms.ok())
+
+  })
+
+  test('Test case 02 - Post new room', async ({ request }) => {
+    const respCreatedRoom = await request.post("http://localhost:3000/api/rooms/new", {
+      headers: {
+        "X-user-auth": JSON.stringify({
+          username: "tester01",
+          token: tokenValue 
+        })
+      },
+      data: JSON.stringify({  // Convert the data to a JSON string
+        category: 'single',
+        floor: 2,
+        number: 103,
+        available: true,
+        price: 1600,
+        features: ['balcony', 'ensuite', 'penthouse']
+      })
+      
+    });
+
+    //console.log(await respCreatedRoom.json())
+    expect (await respCreatedRoom.ok())
+
+})
+
+
+
+})
