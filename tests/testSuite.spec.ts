@@ -33,9 +33,31 @@ import { test, expect } from '@playwright/test';
 
   })
 
-  test('Test case 02 - Post new room', async ({ request }) => {
-    const respCreatedRoom = await request.post("http://localhost:3000/api/rooms/new", {
+
+
+  test('Test case 02 - Delete room', async ({ request }) => {
+    const respDeletedRoom = await request.delete("http://localhost:3000/api/room/1", {
       headers: {
+        "Content-Type": "application/json", 
+        "X-user-auth": JSON.stringify({
+          username: "tester01",
+          token: tokenValue 
+        })
+      },
+      
+    });
+
+    //console.log(await respCreatedRoom.json())
+    expect (await respDeletedRoom.ok())
+
+})
+
+
+
+  test('Test case 03 - Post new room', async ({ request }) => {
+    const respCreatedRoom = await request.post("http://localhost:3000/api/room/new", {
+      headers: {
+        "Content-Type": "application/json", 
         "X-user-auth": JSON.stringify({
           username: "tester01",
           token: tokenValue 
