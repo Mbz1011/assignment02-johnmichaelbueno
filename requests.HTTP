@@ -1,0 +1,26 @@
+### /login
+
+POST http://localhost:3000/api/login
+Content-Type: application/json
+
+{
+"username":"tester01",
+"password":"GteteqbQQgSr88SwNExUQv2ydb7xuf8c"
+    
+}
+###
+GET http://localhost:3000/api/clients
+Content-Type: application/json
+X-user-auth: {"username": "tester01", "token": "e339161d4eb26412a8806fb58e7e3c62"}
+
+###
+GET http://localhost:3000/api/rooms
+Content-Type: application/json
+X-user-auth: {"username": "tester01", "token": "dccad862bc3151b1e2dff620d2aa48ec"}
+
+###
+POST http://localhost:3000/api/room/new
+Content-Type: application/json
+X-user-auth: {"username": "tester01", "token": "dccad862bc3151b1e2dff620d2aa48ec"}
+
+{"features":[],"category":"double","number":"111","floor":"1","available":true,"price":"1233"}
