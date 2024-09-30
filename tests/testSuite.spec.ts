@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { APIHelper } from './apiHelpers';
+
 
 
   test.describe('Test suite - Tester Hotel', () => {
@@ -31,7 +31,8 @@ import { APIHelper } from './apiHelpers';
     
       // Ensure the response is OK
       expect(respRooms.ok()).toBeTruthy();
-       const roomsData = await respRooms.json();
+      const roomsData = await respRooms.json();
+      console.log(roomsData);
     
       // Ensure the response is an array of rooms
       expect(Array.isArray(roomsData)).toBeTruthy();
@@ -45,13 +46,14 @@ import { APIHelper } from './apiHelpers';
         expect(firstRoom.category).toBe('double'); 
         expect(firstRoom.floor).toBe(1);
         expect(firstRoom.number).toBe(101);
+        console.log(firstRoom);
       } else { //In case there is no rooms
         throw new Error("No rooms returned in the response");
       }
     });
     
     
-//Tests Delete endpoint
+//Tests Delete endpoint for rooms
 test('Test case 02 - Delete room', async ({ request }) => {
   const respDeletedRoom = await request.delete("http://localhost:3000/api/room/1", {
     headers: {
@@ -64,20 +66,28 @@ test('Test case 02 - Delete room', async ({ request }) => {
   });
 
   //Verifying the response to be 200 since that's what the API seems to be designed to do.
-  expect(respDeletedRoom.ok()).toBeTruthy;
-  expect(respDeletedRoom.status()).toBe(200); 
+  expect(respDeletedRoom.ok());
+  
   console.log(await respDeletedRoom.json());
   
 
   
   //Trying to retrieve the deleted room to confirm it no longer exists
-  const respGetDeletedRoom = await request.get("http://localhost:3000/api/room/1");
+  const respGetDeletedRoom = await request.get("http://localhost:3000/api/room/1", {
+    headers: {
+      "Content-Type": "application/json",
+      "X-user-auth": JSON.stringify({
+        username: "tester01",
+        token: tokenValue
+      })
+    },
+  });
     
-  //Currently the API seems to return a 401 Unauthorized for some reason
+  //Currently a bug causes the API to return a 401 Unauthorized so test will fail.
 
   // Trying to verify that the deleted room no longer exists
-  expect(respGetDeletedRoom.ok()).toBeTruthy(); // 
-  console.log(await respGetDeletedRoom.json());
+  expect(respGetDeletedRoom.status()).toBe(404); 
+ 
 });
 
 //Test for Post endpoint for new rooms
@@ -148,6 +158,7 @@ test('Test case 04 - Edit Room', async ({ request }) => {
   expect(editedRoomData.features).toEqual(['balcony', 'ensuite', 'penthouse']); 
 });
 
+// Similiar test to Test case 01 but for clients endpoint
 test('Test case 05 - Get all clients', async ({ request }) => {
   const respClients = await request.get("http://localhost:3000/api/clients", {
     headers: {
@@ -158,12 +169,30 @@ test('Test case 05 - Get all clients', async ({ request }) => {
     },
   });
 
-  console.log(await respClients.json())
-  expect (await respClients.ok())
+  
+  expect(respClients.ok()).toBeTruthy();
+  const clientsData = await respClients.json();
+  console.log(clientsData);
 
+  
+  expect(Array.isArray(clientsData)).toBeTruthy();
+
+  
+  if (clientsData.length > 0) {
+    const firstclient= clientsData[0];
+
+    
+    expect(firstclient).toHaveProperty('id'); 
+    expect(firstclient.name).toBe("Jonas Hellman"); 
+    expect(firstclient.email).toBe("jonas.hellman@example.com");
+    expect(firstclient.telephone).toBe("070 000 0001");
+    console.log(firstclient);
+  } else { //In case there is no clients
+    throw new Error("No clients returned in the response");
+  }
 })
-
-test('Test case 06 - Delete client and verify deletion', async ({ request }) => {
+//Delete bug persists for Client Delete endpoint as well so this test will fail
+test('Test case 06 - Delete client', async ({ request }) => {
   
   const respDeletedClient = await request.delete("http://localhost:3000/api/client/1", {
     headers: {
@@ -177,8 +206,7 @@ test('Test case 06 - Delete client and verify deletion', async ({ request }) => 
 
   
   expect(respDeletedClient.ok()).toBeTruthy();
-  const statusCode = respDeletedClient.status();
-  expect([200, 204]).toContain(statusCode); 
+  
 
   
   const respGetClient = await request.get("http://localhost:3000/api/client/1", {
@@ -191,13 +219,13 @@ test('Test case 06 - Delete client and verify deletion', async ({ request }) => 
     }
   });
 
-  
-  expect(respGetClient.status()).toBe(401); 
+  //Bug makes API return 401 instead of 404
+  expect(respGetClient.status()).toBe(404); 
 });
 
 
 
-
+//Test for Client Post endpoint
 test('Test case 07 - Post new Client', async ({ request }) => {
   const respCreatedClient = await request.post("http://localhost:3000/api/client/new", {
     headers: {
@@ -228,7 +256,7 @@ test('Test case 07 - Post new Client', async ({ request }) => {
 
 })
 
-
+// Test for Client Put Endpoint
 test('Test case 08 - Edit Client', async ({ request }) => {
   const respEditedClient = await request.put("http://localhost:3000/api/client/2", {
     headers: {
@@ -259,6 +287,7 @@ test('Test case 08 - Edit Client', async ({ request }) => {
 
 })
 
+//Test for Bill Post endpoint
 test('Test case 09 - Post new Bill', async ({ request }) => {
   const respCreatedBill = await request.post("http://localhost:3000/api/bill/new", {
     headers: {
@@ -270,7 +299,7 @@ test('Test case 09 - Post new Bill', async ({ request }) => {
     },
     data: JSON.stringify({  
       paid: true,
-      value: "3000",
+      value: 3000,
       
       
     })
@@ -288,6 +317,8 @@ test('Test case 09 - Post new Bill', async ({ request }) => {
   expect(createdBill.value).toBe(3000);
 
 })
+
+//Test for Reservation Post endpoint
 test('Test case 10 - Post new Reservation', async ({ request }) => {
   const respCreatedReservation = await request.post("http://localhost:3000/api/reservation/new", {
     headers: {

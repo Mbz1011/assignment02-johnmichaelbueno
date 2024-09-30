@@ -11,7 +11,7 @@ Content-Type: application/json
 ###
 GET http://localhost:3000/api/clients
 Content-Type: application/json
-X-user-auth: {"username": "tester01", "token": "e339161d4eb26412a8806fb58e7e3c62"}
+X-user-auth: {"username": "tester01", "token": "be46d7491cc35fbcae1aa21a4f6760b9"}
 
 ###
 GET http://localhost:3000/api/rooms
@@ -21,6 +21,11 @@ X-user-auth: {"username": "tester01", "token": "dccad862bc3151b1e2dff620d2aa48ec
 ###
 POST http://localhost:3000/api/room/new
 Content-Type: application/json
-X-user-auth: {"username": "tester01", "token": "dccad862bc3151b1e2dff620d2aa48ec"}
+X-user-auth: {"username": "tester01", "token": "be46d7491cc35fbcae1aa21a4f6760b9"}
 
 {"features":[],"category":"double","number":"111","floor":"1","available":true,"price":"1233"}
+
+###
+GET http://localhost:3000/api/room/1
+Content-Type: application/json
+X-user-auth: {"username": "tester01", "token": "97d8c4fd047997f3131c86627514f37f"}
